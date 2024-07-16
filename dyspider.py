@@ -32,8 +32,14 @@ chrome_options.add_argument('--no-sandbox')
 browser = webdriver.Chrome(executable_path=chrome_driver_path, options=chrome_options)
 browser.maximize_window()
 
-
+#此处更改搜索文本
+Search_Content = "深圳联通客服不专业不解决问题"
 
 if __name__ == '__main__':
-    # dy_search.begin_search(browser, "屋顶光伏", 300, 182, 0)
-    dy_search.save_searched_video_list_data(browser,"屋顶光伏")
+    # 请分别运行dy_search.begin_search 和 dy_search.save_searched_video_list_data，不能同时运行
+    #begin_search(browser: WebDriver, keyword: str, expect_search_result_num: int, publish_time: int, sort_type: int)
+    #publish_time={0表示不限}&sort_type={type,0表示综合排序,2表示最新发布,1表示最多点赞}
+
+    #dy_search.begin_search(browser, Search_Content, 75, 0, 0)
+    dy_search.save_searched_video_list_data(browser,Search_Content)
+

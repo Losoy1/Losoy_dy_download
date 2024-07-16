@@ -138,11 +138,16 @@ def get_comment_info_by_lxml(root, index):
     # name:   	//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[10]/div/div[2]/div/div[1]/div[1]/div/a/span/span/span/span/span/span
     # comment:	//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[10]/div/div[2]/div/p
 
-    comment_text_relative_xpath = "div/div[2]/div/p/span/span/span/span/span/span/span"
-    user_name_relative_xpath = "div/div[2]/div/div[1]/div[1]/div/a/span/span/span/span/span/span"
-    main_page_relative_xpath = "div/div[2]/div/div[1]/div[1]/div/a/@href"
-    praise_relative_xpath = "div/div[2]/div/div[3]/div/div[1]/p[1]/span"
-    comment_time_and_location_relative_xpath = "div/div[2]/div/div[2]/span"
+
+    comment_text_relative_xpath = "div/div[2]/div/div[2]/span/span/span/span/span/span/span"
+
+    user_name_relative_xpath = "div/div[2]/div/div[1]/div[1]/div[1]/a/span/span/span/span/span"
+
+    main_page_relative_xpath = "div/div[2]/div/div[1]/div[1]/div[1]/a/@href"
+
+    praise_relative_xpath = "div/div[2]/div/div[4]/div/div[1]/p[1]/span"
+
+    comment_time_and_location_relative_xpath = "div/div[2]/div/div[3]/span"
 
     comment_info = {}
 
@@ -193,23 +198,24 @@ def get_comment_info_by_lxml(root, index):
 def get_comment_info_by_selenium(browser: WebDriver, index):
     comment_info = {}
     user_name = browser.find_element(By.XPATH,
-                                     f'//*[@id="root"]/div/div[2]/div/div/div[1]/div[3]/div/div/div[4]/div[{index + 1}]/div/div[2]/div[1]/div[2]/div[1]/div/a/span/span/span/span/span').text
+                                     f'//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[{index + 1}]/div/div[2]/div/div[1]/div[1]/div/a/span/span/span/span/span').text
     print(f'用户名: {user_name}')
     comment_info["user_name"] = user_name
     #
     main_page = browser.find_element(By.XPATH,
-                                     f'//*[@id="root"]/div/div[2]/div/div/div[1]/div[3]/div/div/div[4]/div[{index + 1}]/div/div[2]/div[1]/div[2]/div[1]/div/a').get_attribute(
-        "href")
+                                     f'//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[{index + 1}]/div/div[1]/a').get_attribute("href")
     print(f'主页: {main_page}')
     comment_info["main_page"] = main_page
 
+
     comment_time = browser.find_element(By.XPATH,
-                                        f'//*[@id="root"]/div/div[2]/div/div/div[1]/div[3]/div/div/div[4]/div[{index + 1}]/div/div[2]/div[1]/div[1]/p').text
+                                        f'//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[{index + 1}]/div/div[2]/div/div[3]').text
     print(f'评论时间: {comment_time}')
     comment_info["comment_time"] = comment_time
 
+
     comment_text = browser.find_element(By.XPATH,
-                                        f'//*[@id="root"]/div/div[2]/div/div/div[1]/div[3]/div/div/div[4]/div[{index + 1}]/div/div[2]/p').text
+                                        f'//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[5]/div/div/div[3]/div[{index + 1}]/div/div[2]/div/div[2]/span/span/span/span/span/span/span').text
     print(f'评论内容: {comment_text}')
     comment_info["comment_text"] = comment_text
 

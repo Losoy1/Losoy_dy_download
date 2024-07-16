@@ -2,9 +2,9 @@
   - 未登录时，登录按钮情况1xpath:`//*[@id="_7hLtYmO"]`
   - 未登录时，登录按钮情况2xpath:`//*[@id="tcTjz3nj"]`
 - 搜索页面
-  - 搜索页面链接: `https://www.douyin.com/search/{keywork}?type=video&?publish_time={day,0表示不限}&sort_type={type,0表示综合排序,1表示最多点赞,2表示最新发布}`
-  - 单个视频的xpath: `//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]`
-  - 视频链接的xpath: `//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]/div/a`
+  - 搜索页面链接: `https://www.douyin.com/search/{keywork}?type=video&?publish_time={day,0表示不限}&sort_type={type,0表示综合排序,2表示最新发布,1表示最多点赞}`
+  - 单个视频的xpath: `//*[@id="search-content-area"]/div/div[1]/div[2]/div[2]/ul/li[{i}]`
+  - 视频链接的xpath: `//*[@id="search-content-area"]/div/div[1]/div[2]/div[2]/ul/li[{i}]/div/a`
 - 视频详情
   - 视频链接: `https://www.douyin.com/video/{video_id}`
   - 视频标题xpath: `//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[3]/div/div[1]/div`
@@ -26,3 +26,4 @@
     - 评论时间相对路径 : `div/div[2]/div/div[2]/span`
   - 结束标记1xpath: `//*[@class="BbQpYS5o HO1_ywVX"]`
   - 结束标记2xpath: `//*[@class="yCJWkVDx"]`
+  

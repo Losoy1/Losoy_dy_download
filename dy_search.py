@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 
 import spider_util
+# from dyspider import Search_Content
 
 file_path = os.path.dirname(__file__)
 tik_tok_prefix_url = 'https://www.douyin.com'
@@ -21,7 +22,9 @@ file_save_path = file_path + r'/spider/'
 @:param expect_search_result_num 期待搜索的结果数量
 '''
 def begin_search(browser: WebDriver, keyword: str, expect_search_result_num: int, publish_time: int, sort_type: int):
-    req_url = f"{tik_tok_prefix_url}/search/{keyword}?publish_time={publish_time}&sort_type={sort_type}&source=tab_search&type=video"
+    # req_url = f"{tik_tok_prefix_url}/search/{keyword}?publish_time={publish_time}&sort_type={sort_type}&source=tab_search&type=video"
+    req_url = f"{tik_tok_prefix_url}/search/{keyword}?aid=publish_time={publish_time}&sort_type={sort_type}&source=tab_search&type=video"
+    print(req_url)
 
     browser.get(req_url)
     time.sleep(2)
@@ -31,9 +34,10 @@ def begin_search(browser: WebDriver, keyword: str, expect_search_result_num: int
 
     video_ur_list = []
     while i <= expect_search_result_num:
-
-        video_div_xpath = f'//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]'
-        video_url_info_xpath = f'//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]/div/a'
+        video_div_xpath = f'//*[@id="search-content-area"]/div/div[1]/div[2]/div[2]/ul/li[{i}]'
+        #video_div_xpath = f'//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]'
+        #video_url_info_xpath = f'//*[@id="douyin-right-container"]/div[2]/div/div[3]/div[2]/ul/li[{i}]/div/a'
+        video_url_info_xpath = f'//*[@id="search-content-area"]/div/div[1]/div[2]/div[2]/ul/li[{i}]/div/a'
 
         WebDriverWait(browser, 30).until(lambda driver: spider_util.find_element_silent(driver, video_div_xpath) is not None)
 
@@ -65,26 +69,53 @@ def begin_search(browser: WebDriver, keyword: str, expect_search_result_num: int
     browser.close()
 
 
+# def save_searched_video_list_data(browser: WebDriver, keyword: str):
+#     req_url = f"{tik_tok_prefix_url}/search/{keyword}?&type=video"
+#     browser.get(req_url)
+#     time.sleep(3)
+#     spider_util.dy_login(browser)
+#
+#     with open(f"{file_save_path}/search/{keyword}/video_url_list.json", 'r', encoding='UTF-8') as file:
+#         video_list_json = file.read()
+#         video_list = json.loads(video_list_json)
+#         print(video_list)
+#
+#     for video_url in video_list:
+#         video_id = spider_util.get_video_id_from_url(video_url)
+#
+#
+#         video_meta_file_path = f"{file_save_path}/work/{video_id}/metadata.json"
+#         video_comment_file_path = f"{file_save_path}/work/{video_id}/comment_list.json"
+#         if os.path.exists(video_meta_file_path) and os.path.exists(video_comment_file_path):
+#             print(f"视频:{video_id}已处理")
+#         else:
+#             save_single_work(browser, video_id)
+
 def save_searched_video_list_data(browser: WebDriver, keyword: str):
     req_url = f"{tik_tok_prefix_url}/search/{keyword}?&type=video"
     browser.get(req_url)
     time.sleep(3)
     spider_util.dy_login(browser)
+
     with open(f"{file_save_path}/search/{keyword}/video_url_list.json", 'r', encoding='UTF-8') as file:
         video_list_json = file.read()
         video_list = json.loads(video_list_json)
         print(video_list)
+
     for video_url in video_list:
         video_id = spider_util.get_video_id_from_url(video_url)
-        video_meta_file_path = f"{file_save_path}/work/{video_id}/metadata.json"
-        video_comment_file_path = f"{file_save_path}/work/{video_id}/comment_list.json"
+
+        video_meta_file_path = f"{file_save_path}/work/{keyword}/{video_id}/metadata.json"
+        video_comment_file_path = f"{file_save_path}/work/{keyword}/{video_id}/comment_list.json"
         if os.path.exists(video_meta_file_path) and os.path.exists(video_comment_file_path):
             print(f"视频:{video_id}已处理")
         else:
             save_single_work(browser, video_id)
 
 
+
 def save_single_work(browser: WebDriver, video_id: str):
+    from dyspider import Search_Content
     print(f"开始存储视频:{video_id}")
     req_url = f"{tik_tok_prefix_url}/video/{video_id}"
 
@@ -99,26 +130,28 @@ def save_single_work(browser: WebDriver, video_id: str):
     windows = browser.window_handles
     browser.switch_to.window(windows[-1])
 
-    save_video_meta_data(browser, video_id)
+    save_video_meta_data(browser, video_id, Search_Content)
 
-    save_comments_by_wait(browser, video_id)
+    save_comments_by_wait(browser, video_id,Search_Content)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(Keys.CONTROL + 'w')
 
 
-def save_video_meta_data(browser: WebDriver, video_id: str):
+def save_video_meta_data(browser: WebDriver, video_id: str, keyword: str):
     req_url = f"{tik_tok_prefix_url}/video/{video_id}"
     video_meta_data = {}
     video_meta_data["id"] = video_id
     video_meta_data["url"] = req_url
 
     title = browser.find_element(By.XPATH,
-                                 '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[3]/div/div[1]/div').text
+                                 '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[3]/div/div[1]/div/h1/span/span[2]/span').text
+
     print(f'标题: {title}')
     video_meta_data["title"] = title
 
     favorite_num = browser.find_element(By.XPATH,
                                         '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]/span').text
+
     print(f"获赞: {favorite_num}")
     video_meta_data["favorite_num"] = favorite_num
 
@@ -141,27 +174,26 @@ def save_video_meta_data(browser: WebDriver, video_id: str):
     author_info = {}
     video_meta_data["author_info"] = author_info
     author_name = browser.find_element(By.XPATH,
-                                       '//*[@id="douyin-right-container"]/div[2]/div/div[2]/div/div[1]/div[2]/a/div/span').text
+                                       '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[4]/div/div[1]/div[2]/a/div/span/span/span/span/span').text
     print(f"作者: {author_name}")
     author_info["name"] = author_name
 
     author_main_page = browser.find_element(By.XPATH,
-                                            '//*[@id="douyin-right-container"]/div[2]/div/div[2]/div/div[1]/div[2]/a').get_attribute(
-        "href")
+                                            '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[4]/div/div[1]/div[1]/a').get_attribute("href")
     print(f"作者主页: {author_main_page}")
     author_info["main_page"] = author_main_page
 
     author_follower_num = browser.find_element(By.XPATH,
-                                              '//*[@id="douyin-right-container"]/div[2]/div/div[2]/div/div[1]/div[2]/p/span[2]').text
+                                              '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[4]/div/div[1]/div[2]/p/span[2]').text
     print(f"作者粉丝: {author_follower_num}")
     author_info["follower_num"] = author_follower_num
 
     author_praise_num = browser.find_element(By.XPATH,
-                                             '//*[@id="douyin-right-container"]/div[2]/div/div[2]/div/div[1]/div[2]/p/span[4]').text
+                                             '//*[@id="douyin-right-container"]/div[2]/div/div[1]/div[4]/div/div[1]/div[2]/p/span[4]').text
     print(f"作者获赞: {author_praise_num}")
     author_info["praise_num"] = author_praise_num
 
-    file_path = f"{file_save_path}/work/{video_id}"
+    file_path = f"{file_save_path}/work/{keyword}/{video_id}"
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     file_name = 'metadata.json'
@@ -172,7 +204,7 @@ def save_video_meta_data(browser: WebDriver, video_id: str):
     return video_meta_data
 
 
-def save_comments_by_wait(browser: WebDriver, video_id: str):
+def save_comments_by_wait(browser: WebDriver, video_id: str, keyword: str):
     comment_list = []
 
     i = 1
@@ -183,8 +215,8 @@ def save_comments_by_wait(browser: WebDriver, video_id: str):
         spider_util.fake_human_scroll(browser,800)
         tree = spider_util.get_lxml_etree(browser)
 
-        end_mark1 = tree.xpath('//*[@class="BbQpYS5o HO1_ywVX"]')
-        end_mark2 = tree.xpath('//*[@class="yCJWkVDx"]')
+        end_mark1 = tree.xpath('//*[@class="fanRMYie cDj65BDb"]')   #暂无更多评论
+        end_mark2 = tree.xpath('//*[@class="ofo4bP_8"]')    #抢首评（0评）
 
         if len(end_mark1) != 0 or len(end_mark2) != 0:
             print(f"发现结束标志")
@@ -207,7 +239,7 @@ def save_comments_by_wait(browser: WebDriver, video_id: str):
             comment_list.append(comment_info)
         i = i + 1
 
-    file_path = f"{file_save_path}/work/{video_id}"
+    file_path = f"{file_save_path}/work/{keyword}/{video_id}"
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     file_name = 'comment_list.json'
@@ -216,7 +248,7 @@ def save_comments_by_wait(browser: WebDriver, video_id: str):
         file.close()
 
 
-def save_comments_manually(browser: WebDriver, video_id: str):
+def save_comments_manually(browser: WebDriver, video_id: str, keyword: str):
     """
     存储评论，需要手动参与
     一般适用于评论很多的视频，因为自动化往下滚动加载会导致视频
@@ -231,7 +263,7 @@ def save_comments_manually(browser: WebDriver, video_id: str):
     i = 0
 
     search_btn = browser.find_element(By.XPATH,
-                                      '//*[@id="douyin-header"]/header/div[2]/div[1]/div/div[2]/div/form')
+                                      '//*[@id="douyin-header"]/div[1]/header/div/div/div[1]/div/div[2]/div/div/input')
 
     while True:
         # browser.execute_script("arguments[0].scrollIntoView();", list[i])
@@ -252,7 +284,7 @@ def save_comments_manually(browser: WebDriver, video_id: str):
             i = i + 1
             comment_list.append(comment_info)
 
-    file_path = f"{file_save_path}/work/{video_id}"
+    file_path = f"{file_save_path}/work/{keyword}/{video_id}"
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     file_name = 'comment_list.json'
@@ -261,7 +293,7 @@ def save_comments_manually(browser: WebDriver, video_id: str):
         file.close()
 
 
-def save_comments_automatically(browser: WebDriver, video_id: str):
+def save_comments_automatically(browser: WebDriver, video_id: str, keyword:str):
     """
     自动化地存储评论
     1. 通过在搜索框输入结束表示评论加载完毕
@@ -289,7 +321,7 @@ def save_comments_automatically(browser: WebDriver, video_id: str):
         i = i + 1
         comment_list.append(comment_info)
 
-    file_path = f"{file_save_path}/work/{video_id}"
+    file_path = f"{file_save_path}/work/{keyword}/{video_id}"
     if not os.path.exists(file_path):
         os.makedirs(file_path)
     file_name = 'comment_list.json'
